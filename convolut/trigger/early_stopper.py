@@ -28,7 +28,7 @@ class EarlyStopper(Module):
         )
 
     def _early_stop(self):
-        self.pub(RunnerForceStopEvent(reason="early.stopping"))
+        self.pub(RunnerForceStopEvent(reason="early_stopping"))
 
     def handle_metric_manager_flush(self, event: MetricManagerFlushEvent):
         metric_values = event.metrics[self._metric_name]

@@ -14,14 +14,13 @@ class Runner(Module):
 
                  epochs: int = 1,
                  steps_per_epoch: Optional[int] = None,
-                 restart_unfinished_loader: Optional[bool] = None,
-                 mediator: Mediator = Mediator(),
-                 debug: bool = False,
+                 restart_iterator: Optional[bool] = None,
+                 mediator: Mediator = Mediator()
                  ):
         super().__init__(mediator)
 
         self._loaders = loaders
-        self._restart_unfinished_loader = restart_unfinished_loader
+        self._restart_iterator = restart_iterator
 
         epochs_limit = 0
         if isinstance(self._loaders, dict):
@@ -31,7 +30,6 @@ class Runner(Module):
 
         self._epochs: List[Epoch] = []
         self._steps_per_epoch = steps_per_epoch
-        self._debug = debug
 
         self._runner_on = False
         self._current_epoch_index = -1
@@ -51,9 +49,8 @@ class Runner(Module):
         epoch = Epoch(epoch_index=epoch_index,
                       loaders=loaders,
                       steps_per_epoch=self._steps_per_epoch,
-                      restart_unfinished_loader=self._restart_unfinished_loader,
-                      mediator=self._mediator,
-                      debug=self._debug)
+                      restart_iterator=self._restart_iterator,
+                      mediator=self._mediator)
 
         return epoch
 
@@ -61,9 +58,10 @@ class Runner(Module):
         self.pub(RunnerStartEvent(runner=self))
 
         self._runner_on = True
-        self._current_epoch_index = 1
+        self._current_epoch_index = 0
 
-        while self._runner_on and self._current_epoch_index <= self.epochs_limit:
+        while self._runner_on and self._current_epoch_index < self.epochs_limit:
+            self._current_epoch_index += 1
             epoch = self._create_epoch(epoch_index=self._current_epoch_index)
             self._epochs.append(epoch)
             self._current_epoch = epoch
@@ -71,8 +69,6 @@ class Runner(Module):
             self.preprocess_epoch(epoch=epoch)
             self.process_epoch(epoch=epoch)
             self.postprocess_epoch(epoch=epoch)
-
-            self._current_epoch_index += 1
 
         self.end()
 

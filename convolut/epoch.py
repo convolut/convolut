@@ -13,19 +13,16 @@ class Epoch(Module):
 
                  loaders: List[Loader],
                  steps_per_epoch: Optional[int],
-                 restart_unfinished_loader: Optional[bool],
+                 restart_iterator: Optional[bool],
 
                  mediator: Mediator,
-                 debug: bool = False
                  ):
         super().__init__(mediator)
         self.epoch_index = epoch_index
 
         self._loaders = loaders
         self._steps_per_epoch = steps_per_epoch
-        self._restart_unfinished_loader = restart_unfinished_loader
-
-        self._debug = debug
+        self._restart_iterator = restart_iterator
 
         self._epoch_on = False
         self._current_loader_name = None
@@ -67,12 +64,9 @@ class Epoch(Module):
         self.pub(EpochProcessLoaderEvent(epoch=self, loader=loader))
 
         loader.start(epoch_index=self.epoch_index,
-
                      maximum_steps=self._steps_per_epoch,
-                     restart_unfinished=self._restart_unfinished_loader,
-
-                     mediator=self._mediator,
-                     debug=self._debug)
+                     restart_iterator=self._restart_iterator,
+                     mediator=self._mediator)
 
     def postprocess_loader(self, loader: Loader):
         self.pub(EpochPostprocessLoaderEvent(epoch=self, loader=loader))

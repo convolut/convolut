@@ -55,9 +55,10 @@ class ModelManager(Module):
         assert (self._optimizer and self._scheduler) or self._optim_fn
 
         self._current_epoch_index = None
-        self._current_batch_index = None
-        self._current_loader_name = None
         self._current_step = None
+        self._current_batch_index = None
+
+        self._current_loader_name = None
         self._current_backward_required = False
 
         self._current_output: torch.Tensor = None
@@ -94,8 +95,8 @@ class ModelManager(Module):
     def handle_process_batch_start(self, event: LoaderProcessBatchStartEvent):
         self._current_loader_name = event.loader.name
         self._current_epoch_index = event.epoch_index
-        self._current_batch_index = event.batch_index
         self._current_step = event.current_step
+        self._current_batch_index = event.batch_index
 
         inpt = self._input_fn(event.batch).to(self._device)
         target = self._target_fn(event.batch).to(self._device)
