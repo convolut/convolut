@@ -1,0 +1,3 @@
+decouple>=0.0.7
+torch
+torchvision

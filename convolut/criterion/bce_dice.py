@@ -1,0 +1,44 @@
+from typing import Optional
+
+import torch
+from torch import nn
+
+from .dice import DiceLoss
+
+
+class BCEDiceLoss(nn.Module):
+    def __init__(self,
+                 eps: float = 1e-7,
+                 threshold: float = None,
+                 activation: Optional[nn.Module] = nn.Sigmoid,
+                 bce_weight: float = 0.5,
+                 dice_weight: float = 0.5,
+                 ):
+        super().__init__()
+
+        if bce_weight == 0 and dice_weight == 0:
+            raise ValueError(
+                "Both bce_wight and dice_weight cannot be "
+                "equal to 0 at the same time."
+            )
+
+        self.bce_weight = bce_weight
+        self.dice_weight = dice_weight
+
+        if self.bce_weight != 0:
+            self.bce_loss = nn.BCEWithLogitsLoss()
+
+        if self.dice_weight != 0:
+            self.dice_loss = DiceLoss(eps=eps, threshold=threshold, activation=activation)
+
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
+        if self.bce_weight == 0:
+            return self.dice_weight * self.dice_loss(output, target=target)
+
+        if self.dice_weight == 0:
+            return self.bce_weight * self.bce_loss(output, target)
+
+        dice = self.dice_weight * self.dice_loss(output, target)
+        bce = self.bce_weight * self.bce_loss(output, target)
+
+        return dice + bce
