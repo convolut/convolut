@@ -27,12 +27,12 @@ class ModelSaveEvent(Event):
 
 @dataclass
 class ModelForwardStartEvent(Event):
-    pass
+    input: torch.Tensor = None
 
 
 @dataclass
 class ModelForwardEndEvent(Event):
-    pass
+    output: torch.Tensor = None
 
 
 @dataclass

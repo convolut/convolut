@@ -118,12 +118,12 @@ class ModelManager(Module):
                                 epoch=event.epoch))
 
     def _forward(self, input: torch.Tensor):
-        self.pub(ModelForwardStartEvent())
+        self.pub(ModelForwardStartEvent(input=input))
 
         output = self._model.forward(input, **self._model_kwargs)
         self._current_output = output
 
-        self.pub(ModelForwardEndEvent())
+        self.pub(ModelForwardEndEvent(output=output))
 
     def _loss(self, output: torch.Tensor, target: torch.Tensor):
         self.pub(ModelLossStartEvent(output=output,
