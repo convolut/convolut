@@ -11,6 +11,7 @@ from ..runner import RunnerStartEvent
 from ..constants import LoaderName, ScheduleType
 from ..epoch import EpochStartEvent, EpochEndEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchStartEvent
+from ..settings import MODEL_MANAGER_SCHEDULE_TYPE
 
 
 class ModelManager(Module):
@@ -23,7 +24,7 @@ class ModelManager(Module):
             criterion,
             optimizer,
             scheduler,
-            schedule_type: str = ScheduleType.PerEpoch,
+            schedule_type: str = MODEL_MANAGER_SCHEDULE_TYPE,
 
             input_fn: Callable[[Any], torch.Tensor] = lambda batch: batch["input"],
             target_fn: Callable[[Any], torch.Tensor] = lambda batch: batch["target"],

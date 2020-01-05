@@ -1,5 +1,5 @@
 import os
-from .constants import ConsoleMode, TelegramMode, TensorboardMode, FlushType, LoaderName
+from .constants import ConsoleMode, TelegramMode, TensorboardMode, FlushType, LoaderName, ScheduleType
 
 GLOBAL_PREFIX = "CONVOLUT_"
 
@@ -34,6 +34,9 @@ LOGGER_TENSORBOARD_FOLDER = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TENSORBOARD_F
 
 # METRIC
 METRIC_MANAGER_FLUSH_TYPE = os.environ.get(f"{GLOBAL_PREFIX}METRIC_MANAGER_FLUSH_TYPE", FlushType.PerLoader)
+
+# MODEL
+MODEL_MANAGER_SCHEDULE_TYPE = os.environ.get(f"{GLOBAL_PREFIX}MODEL_MANAGER_SCHEDULE_TYPE", ScheduleType.PerEpoch)
 
 # STATE
 STATE_FILE_CHECKPOINT_FOLDER = os.environ.get(f"{GLOBAL_PREFIX}STATE_FILE_CHECKPOINT_FOLDER", "logs/checkpoints")
