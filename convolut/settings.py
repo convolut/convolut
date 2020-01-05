@@ -1,5 +1,5 @@
 import os
-from .constants import ConsoleMode, TelegramMode, TensorboardMode, FlushType, LoaderName, ScheduleType, StateMode
+from .constants import ConsoleMode, FlushType, LoaderName, ScheduleType, StateMode
 
 GLOBAL_PREFIX = "CONVOLUT_"
 
@@ -23,14 +23,6 @@ LOGGER_CONSOLE_MODE = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_CONSOLE_MODE", Cons
 
 LOGGER_FILE_FOLDER = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_FILE_FOLDER", "logs/file")
 LOGGER_FILE_FILENAME = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_FILE_FILENAME", "log.txt")
-
-LOGGER_TELEGRAM_TOKEN = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TELEGRAM_TOKEN", None)
-LOGGER_TELEGRAM_CHAT_ID = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TELEGRAM_CHAT_ID", None)
-LOGGER_TELEGRAM_MODE = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TELEGRAM_MODE", TelegramMode.Basic)
-LOGGER_TELEGRAM_PROXY = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TELEGRAM_PROXY", 'https://api.telegram.org')
-
-LOGGER_TENSORBOARD_MODE = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TENSORBOARD_MODE", TensorboardMode.Basic)
-LOGGER_TENSORBOARD_FOLDER = os.environ.get(f"{GLOBAL_PREFIX}LOGGER_TENSORBOARD_FOLDER", "logs/tensorboard")
 
 # METRIC
 METRIC_MANAGER_FLUSH_TYPE = os.environ.get(f"{GLOBAL_PREFIX}METRIC_MANAGER_FLUSH_TYPE", FlushType.PerEpoch)
