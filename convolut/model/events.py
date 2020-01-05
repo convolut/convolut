@@ -6,7 +6,6 @@ from decouple import Event
 from torch import nn
 
 from ..runner import Runner
-from ..epoch import Epoch
 
 
 @dataclass
@@ -22,7 +21,17 @@ class ModelSaveEvent(Event):
     model: nn.Module = None
     optimizer: Any = None
     scheduler: Any = None
-    epoch: Epoch = None
+    epoch_index: int = None
+
+
+@dataclass
+class ModelSaveBestEvent(ModelSaveEvent):
+    pass
+
+
+@dataclass
+class ModelSaveLastEvent(ModelSaveEvent):
+    pass
 
 
 @dataclass

@@ -1,5 +1,5 @@
 import os
-from .constants import ConsoleMode, TelegramMode, TensorboardMode, FlushType, LoaderName, ScheduleType
+from .constants import ConsoleMode, TelegramMode, TensorboardMode, FlushType, LoaderName, ScheduleType, StateMode
 
 GLOBAL_PREFIX = "CONVOLUT_"
 
@@ -41,6 +41,8 @@ MODEL_MANAGER_SCHEDULE_TYPE = os.environ.get(f"{GLOBAL_PREFIX}MODEL_MANAGER_SCHE
 # STATE
 STATE_FILE_CHECKPOINT_FOLDER = os.environ.get(f"{GLOBAL_PREFIX}STATE_FILE_CHECKPOINT_FOLDER", "logs/checkpoints")
 STATE_FILE_CHECKPOINT_SUFFIX = os.environ.get(f"{GLOBAL_PREFIX}STATE_FILE_CHECKPOINT_SUFFIX", "_checkpoint.pth")
+
+STATE_MANAGER_STATE_MODE = os.environ.get(f"{GLOBAL_PREFIX}STATE_MANAGER_STATE_MODE", StateMode.Last)
 
 # TRIGGER
 TRIGGER_EARLY_STOPPER_WINDOW = int(os.environ.get(f"{GLOBAL_PREFIX}TRIGGER_EARLY_STOPPER_WINDOW", 3))

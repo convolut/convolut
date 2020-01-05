@@ -1,3 +1,4 @@
+import torch
 from decouple import Module
 
 from .events import (
@@ -8,14 +9,22 @@ from .events import (
     StateSaveEvent,
     StateLoadEvent
 )
-from ..model import ModelInitEvent, ModelSaveEvent
+from ..constants import StateMode
+from ..model import ModelInitEvent, ModelSaveLastEvent, ModelSaveBestEvent
+from ..runner import Runner
+from ..settings import STATE_MANAGER_STATE_MODE
 
 
 class StateManager(Module):
-    def __init__(self):
+    def __init__(self,
+                 mode: str = STATE_MANAGER_STATE_MODE,
+                 ):
         super().__init__()
 
-        self._model = None
+        self._mode = mode
+
+        self._runner: Runner = None
+        self._model: torch.nn.Module = None
         self._optimizer = None
         self._scheduler = None
 
@@ -24,44 +33,61 @@ class StateManager(Module):
                 .sub(CheckpointSavedEvent, self.handle_checkpoint_saved)
                 .sub(CheckpointLoadingEvent, self.handle_checkpoint_loading)
                 .sub(CheckpointLoadedEvent, self.handle_checkpoint_loaded)
-                .sub(ModelInitEvent, self.load_last_state)
-                .sub(ModelSaveEvent, self.save_last_state)
+                .sub(ModelInitEvent, self.handle_model_init)
+                .sub(ModelSaveLastEvent, self.handle_model_save_last)
+                .sub(ModelSaveBestEvent, self.handle_model_save_best)
         )
 
     def handle_checkpoint_saving(self, event: CheckpointSavingEvent):
-        print(event)
+        print(f'checkpoint_saving.{event.checkpoint_type}')
 
     def handle_checkpoint_saved(self, event: CheckpointSavedEvent):
-        print(event)
+        print(f'checkpoint_saved.{event.checkpoint_type}')
 
     def handle_checkpoint_loading(self, event: CheckpointLoadingEvent):
-        print(event)
+        print(f'checkpoint_loading.{event.checkpoint_type}')
 
     def handle_checkpoint_loaded(self, event: CheckpointLoadedEvent):
-        model_state = event.checkpoint["model"]
-        optimizer_state = event.checkpoint["optimizer"]
-        scheduler_state = event.checkpoint["scheduler"]
+        print(f'checkpoint_loaded.{event.checkpoint_type}')
+
+        model_state_dict = event.checkpoint["model_state_dict"]
+        self._model.load_state_dict(model_state_dict)
+
+        optimizer_state_dict = event.checkpoint["optimizer_state_dict"]
+        self._optimizer.load_state_dict(optimizer_state_dict)
+
+        scheduler_state_dict = event.checkpoint["scheduler_state_dict"]
+        self._scheduler.load_state_dict(scheduler_state_dict)
+
         epoch_index = event.checkpoint["epoch_index"]
+        self._runner.current_epoch_index = epoch_index
 
-        state_type = event.checkpoint_type
+        print(f'objects_were_initialized_from_checkpoint.{event.checkpoint_type}')
 
-        print(event)
-
-    def save_last_state(self, event: ModelSaveEvent):
+    def handle_model_save_last(self, event: ModelSaveLastEvent):
         state = {
-            "model": event.model,
-            "optimizer": event.optimizer,
-            "scheduler": event.scheduler,
-            "epoch_index": event.epoch.epoch_index
+            "model_state_dict": event.model.state_dict(),
+            "optimizer_state_dict": event.optimizer.state_dict(),
+            "scheduler_state_dict": event.scheduler.state_dict(),
+            "epoch_index": event.epoch_index
         }
-        state_type = "last"
 
-        self.pub(StateSaveEvent(state=state, state_type=state_type))
+        self.pub(StateSaveEvent(state=state, state_type=StateMode.Last))
 
-    def load_last_state(self, event: ModelInitEvent):
+    def handle_model_save_best(self, event: ModelSaveBestEvent):
+        state = {
+            "model_state_dict": event.model.state_dict(),
+            "optimizer_state_dict": event.optimizer.state_dict(),
+            "scheduler_state_dict": event.scheduler.state_dict(),
+            "epoch_index": event.epoch_index
+        }
+
+        self.pub(StateSaveEvent(state=state, state_type=StateMode.Best))
+
+    def handle_model_init(self, event: ModelInitEvent):
+        self._runner = event.runner
         self._model = event.model
         self._optimizer = event.optimizer
         self._scheduler = event.scheduler
-        state_type = "last"
 
-        self.pub(StateLoadEvent(state_type=state_type))
+        self.pub(StateLoadEvent(state_type=self._mode))

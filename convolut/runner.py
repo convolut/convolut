@@ -37,7 +37,7 @@ class Runner(Module):
         self._steps_per_epoch = steps_per_epoch
 
         self._runner_on = False
-        self._current_epoch_index = -1
+        self.current_epoch_index = 0
         self._current_epoch: Optional[Epoch] = None
 
         (
@@ -63,11 +63,10 @@ class Runner(Module):
         self.pub(RunnerStartEvent(runner=self))
 
         self._runner_on = True
-        self._current_epoch_index = 0
 
-        while self._runner_on and self._current_epoch_index < self.epochs_limit:
-            self._current_epoch_index += 1
-            epoch = self._create_epoch(epoch_index=self._current_epoch_index)
+        while self._runner_on and self.current_epoch_index < self.epochs_limit:
+            self.current_epoch_index += 1
+            epoch = self._create_epoch(epoch_index=self.current_epoch_index)
             self._epochs.append(epoch)
             self._current_epoch = epoch
 

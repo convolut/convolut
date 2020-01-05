@@ -4,9 +4,32 @@
 #
 #    pip-compile requirements.in
 #
+absl-py==0.9.0            # via tensorboard
+cachetools==4.0.0         # via google-auth
+certifi==2019.11.28       # via requests
+chardet==3.0.4            # via requests
 decouple==0.0.7
-numpy==1.18.0             # via torch, torchvision
+google-auth-oauthlib==0.4.1  # via tensorboard
+google-auth==1.10.0       # via google-auth-oauthlib, tensorboard
+grpcio==1.26.0            # via tensorboard
+idna==2.8                 # via requests
+markdown==3.1.1           # via tensorboard
+numpy==1.18.0             # via tensorboard, torch, torchvision
+oauthlib==3.1.0           # via requests-oauthlib
 pillow==6.2.1             # via torchvision
-six==1.13.0               # via torchvision
+protobuf==3.11.2          # via tensorboard
+pyasn1-modules==0.2.7     # via google-auth
+pyasn1==0.4.8             # via pyasn1-modules, rsa
+requests-oauthlib==1.3.0  # via google-auth-oauthlib
+requests==2.22.0          # via requests-oauthlib, tensorboard
+rsa==4.0                  # via google-auth
+six==1.13.0               # via absl-py, google-auth, grpcio, protobuf, tensorboard, torchvision
+tensorboard==2.1.0
 torch==1.3.1
 torchvision==0.4.2
+urllib3==1.25.7           # via requests
+werkzeug==0.16.0          # via tensorboard
+wheel==0.33.6             # via tensorboard
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

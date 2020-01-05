@@ -1,16 +1,19 @@
-from typing import Dict, Any, Callable, Union, Tuple, Optional
+from statistics import mean
+from typing import Dict, Any, Callable, Optional, List
 
 import torch
-from torch import nn
 from decouple import Module
+from torch import nn
+
 from .events import (
     ModelForwardStartEvent, ModelForwardEndEvent, ModelBackwardStartEvent, ModelBackwardEndEvent, ModelLossEndEvent,
     ModelLossStartEvent, ModelScheduleEndEvent, ModelScheduleStartEvent, ModelInitEvent,
-    ModelSaveEvent)
-from ..runner import RunnerStartEvent
+    ModelSaveLastEvent, ModelSaveBestEvent
+)
 from ..constants import LoaderName, ScheduleType
 from ..epoch import EpochStartEvent, EpochEndEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchStartEvent
+from ..runner import RunnerStartEvent
 from ..settings import MODEL_MANAGER_SCHEDULE_TYPE
 
 
@@ -56,6 +59,9 @@ class ModelManager(Module):
 
         self._current_output: torch.Tensor = None
         self._current_loss = None
+
+        self._current_epoch_valid_loss_values: List[float] = []
+        self._current_epoch_valid_mean_loss: float = None
 
         (
             self.sub(RunnerStartEvent, self.handle_runner_start)
@@ -110,10 +116,27 @@ class ModelManager(Module):
         if self._schedule_type == ScheduleType.PerEpoch:
             self._schedule()
 
-        self.pub(ModelSaveEvent(model=self._model,
-                                optimizer=self._optimizer,
-                                scheduler=self._scheduler,
-                                epoch=event.epoch))
+        self._check_and_save_best()
+
+        self.pub(ModelSaveLastEvent(model=self._model,
+                                    optimizer=self._optimizer,
+                                    scheduler=self._scheduler,
+                                    epoch_index=self._current_epoch_index))
+
+    def _check_and_save_best(self):
+        if len(self._current_epoch_valid_loss_values) == 0:
+            return
+
+        previous_loss_value = self._current_epoch_valid_mean_loss
+        self._current_epoch_valid_mean_loss = mean(self._current_epoch_valid_loss_values)
+        self._current_epoch_valid_loss_values = []
+
+        if previous_loss_value is None or (
+                previous_loss_value and previous_loss_value > self._current_epoch_valid_mean_loss):
+            self.pub(ModelSaveBestEvent(model=self._model,
+                                        optimizer=self._optimizer,
+                                        scheduler=self._scheduler,
+                                        epoch_index=self._current_epoch_index))
 
     def _forward(self, input: torch.Tensor):
         self.pub(ModelForwardStartEvent(input=input))
@@ -132,6 +155,8 @@ class ModelManager(Module):
 
         loss = self._criterion(output, target)
         self._current_loss = loss
+        if self._current_loader_name == LoaderName.Valid:
+            self._current_epoch_valid_loss_values.append(loss.item())
 
         self.pub(ModelLossEndEvent(loss=loss,
                                    epoch_index=self._current_epoch_index,
