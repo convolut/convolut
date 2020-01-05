@@ -3,23 +3,21 @@ import sys
 from decouple import Module
 
 from ..events import RunnerForceStopEvent
-from ..constants import AnsiColor as Color, ConsoleMode
+from ..constants import AnsiColor as Color
 from ..metric.metric_manager import MetricManagerFlushEvent
 from ..runner import RunnerStartEvent
 from ..epoch import EpochStartEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchEndEvent
 
 
-class ConsoleLogger(Module):
+class FileLogger(Module):
     def __init__(self,
-                 mode: str = ConsoleMode.SingleLine,
                  folder: str = "run/logs"):
         super().__init__()
 
-        self._mode = mode
         self._folder = folder
 
-        self._current_epochs_limit = 0
+        self._current_epoch_limit = 0
         self._current_epoch_index = 0
         self._current_train_global_step = 0
         self._current_valid_global_step = 0
@@ -39,12 +37,12 @@ class ConsoleLogger(Module):
 
     def _write_progress_bar(self,
                             epoch_index: int,
-                            epochs_limit: int,
+                            epoch_limit: int,
                             loader_name: str,
                             global_step: int,
                             text: str,
                             bar_length: int = 20):
-        division = float(epoch_index) / epochs_limit
+        division = float(epoch_index) / epoch_limit
         percent = int(100 * division)
         arrow = '=' * int(round(division * bar_length) - 1) + '>'
         spaces = '_' * (bar_length - len(arrow))
@@ -69,17 +67,16 @@ class ConsoleLogger(Module):
 
     def refresh_progress_bar(self):
         self._write_progress_bar(epoch_index=self._current_epoch_index,
-                                 epochs_limit=self._current_epochs_limit,
+                                 epoch_limit=self._current_epoch_limit,
                                  loader_name=self._current_loader_name,
                                  global_step=self._current_train_global_step,
                                  text=self._current_text)
 
     def handle_runner_start(self, event: RunnerStartEvent):
-        self._current_epochs_limit = event.runner.epochs_limit
+        self._current_epoch_limit = event.runner.epochs_limit
 
     def handle_runner_force_stop(self, event: RunnerForceStopEvent):
-        text = f'runner.force_stop.reason={event.reason}'
-        print(text)
+        print('Runner Force Stop')
 
     def handle_epoch_start(self, event: EpochStartEvent):
         self._current_epoch_index = event.epoch.epoch_index
@@ -103,20 +100,16 @@ class ConsoleLogger(Module):
         text = ""
 
         for metric, epochs in event.metrics.items():
-            if metric not in self._last_loaders:
-                self._last_loaders[metric] = {}
-
             for epoch, loaders in epochs.items():
                 if epoch == self._current_epoch_index:
                     for loader, value in loaders.items():
-                        self._last_loaders[metric][loader] = value
+                        self._last_loaders[loader] = value
 
-        for metric, loaders in self._last_loaders.items():
-            for loader, value in loaders.items():
-                if text:
-                    text = text + f", ({loader}){metric}: {value:3.4f}"
-                else:
-                    text = text + f"({loader}){metric}: {value:3.4f}"
+        for loader, value in self._last_loaders.items():
+            if text:
+                text = text + f", ({loader}){metric}: {value:3.4f}"
+            else:
+                text = text + f"({loader}){metric}: {value:3.4f}"
 
         self._current_text = text
 

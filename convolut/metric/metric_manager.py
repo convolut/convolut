@@ -4,14 +4,10 @@ from typing import Dict, List
 
 from decouple import Module, Event
 
+from ..constants import FlushType
 from .events import MetricEvent
 from ..epoch import EpochEndEvent
 from ..loader import LoaderEndEvent
-
-
-class FlushType:
-    PerEpoch = "epoch"
-    PerLoader = "loader"
 
 
 class MetricManager(Module):

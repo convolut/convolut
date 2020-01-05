@@ -8,14 +8,9 @@ from .events import (
     ModelLossStartEvent, ModelScheduleEndEvent, ModelScheduleStartEvent, ModelInitEvent,
     ModelSaveEvent)
 from ..runner import RunnerStartEvent
-from ..constants import LoaderName
+from ..constants import LoaderName, ScheduleType
 from ..epoch import EpochStartEvent, EpochEndEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchStartEvent
-
-
-class ScheduleType:
-    PerEpoch = "per_epoch"
-    PerBatch = "per_batch"
 
 
 class ModelManager(Module):

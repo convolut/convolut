@@ -1,0 +1,2 @@
+class TelegramMode:
+    Basic = "basic"

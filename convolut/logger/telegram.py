@@ -4,14 +4,11 @@ from urllib.request import Request, urlopen
 
 from decouple import Module
 
+from ..constants import TelegramMode
 from ..runner import RunnerStartEvent, RunnerEndEvent, RunnerForceStopEvent
 from ..epoch import EpochStartEvent
 from ..metric import MetricManagerFlushEvent
 from ..loader import LoaderStartEvent
-
-
-class TelegramMode:
-    Basic = "basic"
 
 
 class TelegramLogger(Module):
@@ -27,7 +24,7 @@ class TelegramLogger(Module):
         self._proxy = proxy
         self._base_url = f"{self._proxy}/bot{self._token}/sendMessage"
 
-        self._current_epoch_limit = 0
+        self._current_epochs_limit = 0
         self._current_epoch_index = 0
         self._current_loader_name = None
         self._last_loaders = {}
@@ -52,7 +49,7 @@ class TelegramLogger(Module):
             print(e)
 
     def handle_runner_start(self, event: RunnerStartEvent):
-        self._current_epoch_limit = event.runner.epochs_limit
+        self._current_epochs_limit = event.runner.epochs_limit
 
         text = f"runner.start"
         self._send(text)
@@ -64,7 +61,7 @@ class TelegramLogger(Module):
         self._current_loader_name = event.loader.name
 
     def handle_runner_force_stop(self, event: RunnerForceStopEvent):
-        text = f"runner_force_stop.reason={event.reason}"
+        text = f"runner.force_stop.reason={event.reason}"
         self._send(text)
 
     def handle_runner_end(self, event: RunnerEndEvent):
@@ -72,18 +69,22 @@ class TelegramLogger(Module):
         self._send(text)
 
     def handle_metric_manager_flush(self, event: MetricManagerFlushEvent):
-        text = f"epoch {self._current_epoch_index}/{self._current_epoch_limit} "
+        text = f"epoch {self._current_epoch_index}/{self._current_epochs_limit} "
 
         for metric, epochs in event.metrics.items():
+            if metric not in self._last_loaders:
+                self._last_loaders[metric] = {}
+
             for epoch, loaders in epochs.items():
                 if epoch == self._current_epoch_index:
                     for loader, value in loaders.items():
-                        self._last_loaders[loader] = value
+                        self._last_loaders[metric][loader] = value
 
-        for loader, value in self._last_loaders.items():
-            if text:
-                text = text + f", ({loader}){metric}: {value:3.4f}"
-            else:
-                text = text + f"({loader}){metric}: {value:3.4f}"
+        for metric, loaders in self._last_loaders.items():
+            for loader, value in loaders.items():
+                if text:
+                    text = text + f", ({loader}){metric}: {value:3.4f}"
+                else:
+                    text = text + f"({loader}){metric}: {value:3.4f}"
 
         self._send(text)

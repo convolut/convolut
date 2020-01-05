@@ -79,8 +79,8 @@ criterion = F.nll_loss
 (
     Runner(loaders=[train_loader, valid_loader],
            epochs=epochs,
-           steps_per_epoch=1000,
-           debug=True)
+           restart_iterator=False,
+           steps_per_epoch=1000)
         # model training
         .add(ModelManager(model=model,
                           device=device,
@@ -95,7 +95,7 @@ criterion = F.nll_loss
         .add(StateManager())
         .add(FileCheckpoint(folder="run/checkpoints"))
         #  metrics
-        .add(MetricManager(flush_type=FlushType.PerLoader))
+        .add(MetricManager(flush_type=FlushType.PerEpoch))
         .add(LossMetric())
         # triggers
         .add(EarlyStopper(window=3, metric_name="loss", loader_name=LoaderName.Train, delta=1e-1))
