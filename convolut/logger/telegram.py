@@ -56,7 +56,8 @@ class TelegramLogger(Module):
     def handle_runner_start(self, event: RunnerStartEvent):
         self._current_epochs_limit = event.runner.epochs_limit
 
-        text = f"runner.start"
+        text = f"############\n" \
+               f"runner.start"
         self._send(text)
 
     def handle_epoch_start(self, event: EpochStartEvent):
@@ -70,7 +71,8 @@ class TelegramLogger(Module):
         self._send(text)
 
     def handle_runner_end(self, event: RunnerEndEvent):
-        text = f"runner.end"
+        text = f"runner.end\n" \
+               f"############"
         self._send(text)
 
     def handle_metric_manager_flush(self, event: MetricManagerFlushEvent):

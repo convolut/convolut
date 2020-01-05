@@ -18,18 +18,12 @@ class TensorboardLogger(Module):
     def __init__(self,
                  folder: str = LOGGER_TENSORBOARD_FOLDER,
                  mode: str = LOGGER_TENSORBOARD_MODE,
-                 # batch_to_save: Optional[List[int]] = None, #todo
-                 # loader_to_save: Optional[str] = None,
-                 # batch_output_fn: Optional[Callable[[Any, Any], torch.Tensor]] = None
                  ):
         super().__init__()
         self._folder = folder
-        self._mode = mode
+        os.makedirs(self._folder, exist_ok=True)
 
-        # self._batch_to_save = batch_to_save
-        # self._loader_to_save = loader_to_save
-        # self._batch_output_fn = batch_output_fn
-        # self._save_images_on = self._batch_output_fn is not None
+        self._mode = mode
 
         self._current_epoch_index = -1
 
@@ -46,24 +40,31 @@ class TensorboardLogger(Module):
                 .sub(LoaderEndEvent, self.handle_loader_end)
                 .sub(EpochEndEvent, self.handle_epoch_end)
                 .sub(RunnerEndEvent, self.handle_runner_end)
+                .sub(MetricEvent, self.handle_metric)
                 .sub(MetricManagerFlushEvent, self.handle_metric_manager_flush)
         )
 
     def handle_epoch_start(self, event: EpochStartEvent):
         self._current_epoch_index = event.epoch.epoch_index
 
+    def _lazy_init_writer(self, loader_name: str):
+        if loader_name not in self._writers:
+            folder = os.path.join(self._folder, f'{loader_name}')
+            self._writers[loader_name] = SummaryWriter(folder, )
+
+        if loader_name not in self._current_global_steps:
+            self._current_global_steps[loader_name] = 0
+
     def handle_loader_start(self, event: LoaderStartEvent):
         self._current_loader_name = event.loader.name
 
-        if self._current_loader_name not in self._writers:
-            folder = os.path.join(self._folder, f'{self._current_loader_name}_log')
-            self._writers[self._current_loader_name] = SummaryWriter(folder)
+        self._lazy_init_writer(self._current_loader_name)
 
     def handle_loader_process_batch_end(self, event: LoaderProcessBatchEndEvent):
-        if event.loader.name not in self._current_global_steps:
-            self._current_global_steps[event.loader.name] = 0
+        loader_name = event.loader.name
+        self._lazy_init_writer(loader_name)
 
-        self._current_global_steps[event.loader.name] += 1
+        self._current_global_steps[loader_name] += 1
 
     def handle_loader_end(self, event: LoaderEndEvent):
         for writer in self._writers.values():
@@ -82,6 +83,7 @@ class TensorboardLogger(Module):
         metric_value = event.metric_value
 
         loader_name = event.periods["loader_name"]
+        self._lazy_init_writer(loader_name)
 
         tag = f"{metric_name}/step"
 

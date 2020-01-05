@@ -5,7 +5,7 @@ import torch
 from decouple import Event
 from torch import nn
 
-from .. import Runner
+from ..runner import Runner
 from ..epoch import Epoch
 
 

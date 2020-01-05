@@ -21,10 +21,12 @@ class FileCheckpoint(Module):
     ):
         super().__init__()
         self._folder = folder
+        os.makedirs(self._folder, exist_ok=True)
+        
         self._suffix = suffix
         self._filenames = {
-            'best': f'best_{self._suffix}',
-            'last': f'last_{self._suffix}',
+            'best': f'best{self._suffix}',
+            'last': f'last{self._suffix}',
         }
 
         self._filepaths = {}

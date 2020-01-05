@@ -3,7 +3,7 @@ from typing import Dict
 
 from decouple import Module
 
-from ..constants import AnsiColor as Color, ConsoleMode
+from ..constants import AnsiColor as Color, ConsoleMode, LoaderName
 from ..epoch import EpochStartEvent
 from ..events import RunnerForceStopEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchEndEvent
@@ -57,7 +57,7 @@ class ConsoleLogger(Module):
             percent_color_f, percent_color_b = Color.F_Red, Color.B_Red
 
         epoch_str = f"\repoch {percent_color_f}{epoch_index:0>3}{Color.F_Default}/{epochs_limit:0>3} "
-        if loader_name == 'train':
+        if loader_name == LoaderName.Train:
             loader_str = f"({Color.F_Cyan}{loader_name}{Color.F_Default}) "
         else:
             loader_str = f"({Color.F_Magenta}{loader_name}{Color.F_Default}) "
@@ -124,5 +124,3 @@ class ConsoleLogger(Module):
                     text = text + f"({loader}){metric}: {value:3.4f}"
 
         self._current_text = text
-
-        self._write_progress()

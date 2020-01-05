@@ -8,10 +8,13 @@ from ..constants import FlushType
 from .events import MetricEvent
 from ..epoch import EpochEndEvent
 from ..loader import LoaderEndEvent
+from ..settings import METRIC_MANAGER_FLUSH_TYPE
 
 
 class MetricManager(Module):
-    def __init__(self, flush_type: str = FlushType.PerLoader):
+    def __init__(self,
+                 flush_type: str = METRIC_MANAGER_FLUSH_TYPE
+                 ):
         super().__init__()
 
         self._flush_type = flush_type
