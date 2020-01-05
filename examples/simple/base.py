@@ -11,8 +11,6 @@ from convolut import Runner, StateManager, MetricManager
 from convolut.loader import TrainLoader, ValidLoader
 from convolut.logger import ConsoleLogger
 from convolut.logger import FileLogger
-from convolut.logger.telegram import TelegramLogger
-from convolut.logger.tensorboard import TensorboardLogger
 from convolut.metric import LossMetric
 from convolut.model import ModelManager
 from convolut.state import FileCheckpoint
@@ -92,8 +90,8 @@ epochs = 10
         # append various loggers
         .add(ConsoleLogger())
         .add(FileLogger())
-        .add(TensorboardLogger())
-        .add(TelegramLogger(token=os.environ.get("TOKEN"), chat_id=os.environ.get("CHAT_ID")))
+        # .add(TensorboardLogger())
+        # .add(TelegramLogger(token=os.environ.get("TOKEN"), chat_id=os.environ.get("CHAT_ID")))
 
         .start()
 )

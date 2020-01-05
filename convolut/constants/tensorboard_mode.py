@@ -1,2 +1,0 @@
-class TensorboardMode:
-    Basic = "basic"
