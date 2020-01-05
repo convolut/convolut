@@ -131,8 +131,7 @@ class ModelManager(Module):
         self._current_epoch_valid_mean_loss = mean(self._current_epoch_valid_loss_values)
         self._current_epoch_valid_loss_values = []
 
-        if previous_loss_value is None or (
-                previous_loss_value and previous_loss_value > self._current_epoch_valid_mean_loss):
+        if previous_loss_value and previous_loss_value > self._current_epoch_valid_mean_loss:
             self.pub(ModelSaveBestEvent(model=self._model,
                                         optimizer=self._optimizer,
                                         scheduler=self._scheduler,

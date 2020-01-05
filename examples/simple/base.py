@@ -10,6 +10,7 @@ from torchvision import datasets, transforms
 from convolut import Runner, StateManager, MetricManager
 from convolut.loader import TrainLoader, ValidLoader
 from convolut.logger import ConsoleLogger
+from convolut.logger import FileLogger
 from convolut.logger.telegram import TelegramLogger
 from convolut.logger.tensorboard import TensorboardLogger
 from convolut.metric import LossMetric
@@ -50,7 +51,7 @@ train_dataloader = torch.utils.data.DataLoader(datasets.MNIST('../data', train=T
                                                                   transforms.ToTensor(),
                                                                   transforms.Normalize((0.1307,), (0.3081,))
                                                               ])),
-                                               batch_size=4, shuffle=False)
+                                               batch_size=2, shuffle=False)
 
 # CONVOLUT LOADERS
 train_loader = TrainLoader(dataloader=train_dataloader)
@@ -69,9 +70,9 @@ scheduler = CosineAnnealingLR(optimizer, 4, 1e-6)
 criterion = F.nll_loss
 
 # RUNNER INITIALIZATION AND RUN
-epochs = 100
+epochs = 10
 (
-    Runner(loaders=[train_loader, valid_loader], epochs=epochs)
+    Runner(loaders=[train_loader, valid_loader], epochs=epochs, steps_per_epoch=10)
         # append model training module
         .add(ModelManager(model=model,
                           device=device,
@@ -90,6 +91,7 @@ epochs = 100
         .add(EarlyStopper())
         # append various loggers
         .add(ConsoleLogger())
+        .add(FileLogger())
         .add(TensorboardLogger())
         .add(TelegramLogger(token=os.environ.get("TOKEN"), chat_id=os.environ.get("CHAT_ID")))
 

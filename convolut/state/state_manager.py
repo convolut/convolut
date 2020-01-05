@@ -39,17 +39,15 @@ class StateManager(Module):
         )
 
     def handle_checkpoint_saving(self, event: CheckpointSavingEvent):
-        print(f'checkpoint_saving.{event.checkpoint_type}')
+        pass
 
     def handle_checkpoint_saved(self, event: CheckpointSavedEvent):
-        print(f'checkpoint_saved.{event.checkpoint_type}')
+        pass
 
     def handle_checkpoint_loading(self, event: CheckpointLoadingEvent):
-        print(f'checkpoint_loading.{event.checkpoint_type}')
+        pass
 
     def handle_checkpoint_loaded(self, event: CheckpointLoadedEvent):
-        print(f'checkpoint_loaded.{event.checkpoint_type}')
-
         model_state_dict = event.checkpoint["model_state_dict"]
         self._model.load_state_dict(model_state_dict)
 
@@ -61,8 +59,6 @@ class StateManager(Module):
 
         epoch_index = event.checkpoint["epoch_index"]
         self._runner.current_epoch_index = epoch_index
-
-        print(f'objects_were_initialized_from_checkpoint.{event.checkpoint_type}')
 
     def handle_model_save_last(self, event: ModelSaveLastEvent):
         state = {
