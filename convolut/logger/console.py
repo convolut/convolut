@@ -1,28 +1,30 @@
 import sys
+from typing import Dict
 
 from decouple import Module
 
+from ..constants import AnsiColor as Color, ConsoleMode
+from ..epoch import EpochStartEvent
 from ..events import RunnerForceStopEvent
-from ..constants import AnsiColor as Color
+from ..loader import LoaderStartEvent, LoaderProcessBatchEndEvent
 from ..metric.metric_manager import MetricManagerFlushEvent
 from ..runner import RunnerStartEvent
-from ..epoch import EpochStartEvent
-from ..loader import LoaderStartEvent, LoaderProcessBatchEndEvent
 from ..settings import LOGGER_CONSOLE_MODE
 
 
 class ConsoleLogger(Module):
     def __init__(self,
-                 mode: str = LOGGER_CONSOLE_MODE):
+                 mode: str = LOGGER_CONSOLE_MODE,
+                 ):
         super().__init__()
 
         self._mode = mode
 
         self._current_epochs_limit = 0
         self._current_epoch_index = 0
-        self._current_train_global_step = 0
-        self._current_valid_global_step = 0
-        self._current_global_step = 0
+
+        self._current_global_steps: Dict[str, int] = {}  # todo
+
         self._current_loader_name = None
         self._current_text = None
         self._last_loaders = {}
@@ -40,8 +42,7 @@ class ConsoleLogger(Module):
                             epoch_index: int,
                             epochs_limit: int,
                             loader_name: str,
-                            global_step: int,
-                            text: str,
+                            current_text: str,
                             bar_length: int = 20):
         division = float(epoch_index) / epochs_limit
         percent = int(100 * division)
@@ -55,7 +56,7 @@ class ConsoleLogger(Module):
         else:
             percent_color_f, percent_color_b = Color.F_Red, Color.B_Red
 
-        epoch_str = f"\repoch {percent_color_f}{epoch_index:0>3}{Color.F_Default}/{epoch_limit:0>3} "
+        epoch_str = f"\repoch {percent_color_f}{epoch_index:0>3}{Color.F_Default}/{epochs_limit:0>3} "
         if loader_name == 'train':
             loader_str = f"({Color.F_Cyan}{loader_name}{Color.F_Default}) "
         else:
@@ -63,15 +64,24 @@ class ConsoleLogger(Module):
 
         percent_str = f"[{percent_color_b}{arrow}{Color.B_Default}{spaces}] "
 
-        sys.stdout.write(f"{epoch_str}{loader_str}{percent_str} {text}")
+        text = f"{epoch_str}{loader_str}{percent_str} {current_text}"
+        self._write(text)
+
+    def _write(self, text: str):
+        if self._mode == ConsoleMode.SingleLine:
+            sys.stdout.write(text)
+        elif self._mode == ConsoleMode.Basic:
+            sys.stdout.write(f'{text}\n')
+        else:
+            raise ValueError(f'unknown mode={self._mode}')
+
         sys.stdout.flush()
 
-    def refresh_progress_bar(self):
+    def _write_progress(self):
         self._write_progress_bar(epoch_index=self._current_epoch_index,
                                  epochs_limit=self._current_epochs_limit,
                                  loader_name=self._current_loader_name,
-                                 global_step=self._current_train_global_step,
-                                 text=self._current_text)
+                                 current_text=self._current_text)
 
     def handle_runner_start(self, event: RunnerStartEvent):
         self._current_epochs_limit = event.runner.epochs_limit
@@ -86,17 +96,13 @@ class ConsoleLogger(Module):
     def handle_loader_start(self, event: LoaderStartEvent):
         self._current_loader_name = event.loader.name
 
-        self.refresh_progress_bar()
+        self._write_progress()
 
     def handle_loader_process_batch_end(self, event: LoaderProcessBatchEndEvent):
-        if event.loader.name == 'train':
-            self._current_train_global_step = event.epoch_index * event.batch_index
-        elif event.loader.name == 'valid':
-            self._current_valid_global_step = event.epoch_index * event.batch_index
-        else:
-            raise ValueError(f'loadername not supported{event.loader.name}')
+        if event.loader.name not in self._current_global_steps:
+            self._current_global_steps[event.loader.name] = 0
 
-        self.refresh_progress_bar()
+        self._current_global_steps[event.loader.name] += 1
 
     def handle_metric_manager_flush(self, event: MetricManagerFlushEvent):
         text = ""
@@ -119,4 +125,4 @@ class ConsoleLogger(Module):
 
         self._current_text = text
 
-        self.refresh_progress_bar()
+        self._write_progress()

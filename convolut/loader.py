@@ -17,7 +17,7 @@ class Loader(Module):
         self._loader_on: bool = False
 
         self._current_epoch_index = -1
-        self._current_step = -1
+        self._current_step_index = -1
         self._current_batch_index = 0
         self._current_maximum_steps = None
         self._current_restart_iterator = False
@@ -38,13 +38,13 @@ class Loader(Module):
                                   epoch_index=self._current_epoch_index,
                                   maximum_steps=self._current_maximum_steps,
                                   restart_iterator=self._current_restart_iterator,
-                                  current_step=self._current_step))
+                                  step_index=self._current_step_index))
 
         self._loader_on = True
-        self._current_step = 0
+        self._current_step_index = 0
 
         while self._loader_on and (
-                (self._current_maximum_steps and self._current_step < self._current_maximum_steps)
+                (self._current_maximum_steps and self._current_step_index < self._current_maximum_steps)
                 or self._current_maximum_steps is None):
             # create dataloader's iterator
             try:
@@ -58,15 +58,15 @@ class Loader(Module):
             self.pub(LoaderProcessBatchStartEvent(loader=self,
                                                   batch=batch,
                                                   epoch_index=epoch_index,
-                                                  current_step=self._current_step,
+                                                  step_index=self._current_step_index,
                                                   batch_index=self._current_batch_index))
 
             self.pub(LoaderProcessBatchEndEvent(loader=self,
                                                 epoch_index=epoch_index,
-                                                current_step=self._current_step,
+                                                step_index=self._current_step_index,
                                                 batch_index=self._current_batch_index))
 
-            self._current_step += 1
+            self._current_step_index += 1
             self._current_batch_index += 1
 
         if self._current_restart_iterator:
@@ -85,7 +85,7 @@ class Loader(Module):
         self._loader_on = False
         self.pub(LoaderEndEvent(loader=self,
                                 epoch_index=self._current_epoch_index,
-                                current_step=self._current_step,
+                                step_index=self._current_step_index,
                                 batch_index=self._current_batch_index,
                                 maximum_steps=self._current_maximum_steps,
                                 restart_iterator=self._current_restart_iterator))
@@ -95,7 +95,7 @@ class Loader(Module):
 class LoaderStartEvent(Event):
     loader: Loader = None
     epoch_index: int = None
-    current_step: int = None
+    step_index: int = None
     maximum_steps: Optional[int] = None
     restart_iterator: bool = None
 
@@ -104,7 +104,7 @@ class LoaderStartEvent(Event):
 class LoaderEndEvent(Event):
     loader: Loader = None
     epoch_index: int = None
-    current_step: int = None
+    step_index: int = None
     batch_index: int = None
     maximum_steps: Optional[int] = None
     restart_iterator: bool = None
@@ -114,7 +114,7 @@ class LoaderEndEvent(Event):
 class LoaderProcessBatchStartEvent(Event):
     loader: Loader = None
     epoch_index: int = None
-    current_step: int = None
+    step_index: int = None
     batch_index: int = None
     batch: Any = None
 
@@ -123,7 +123,7 @@ class LoaderProcessBatchStartEvent(Event):
 class LoaderProcessBatchEndEvent(Event):
     loader: Loader = None
     epoch_index: int = None
-    current_step: int = None
+    step_index: int = None
     batch_index: int = None
 
 

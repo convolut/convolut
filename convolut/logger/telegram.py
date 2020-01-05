@@ -20,7 +20,8 @@ class TelegramLogger(Module):
                  token: str = LOGGER_TELEGRAM_TOKEN,
                  channel: str = LOGGER_TELEGRAM_CHANNEL,
                  mode: str = LOGGER_TELEGRAM_MODE,
-                 proxy: str = LOGGER_TELEGRAM_PROXY):
+                 proxy: str = LOGGER_TELEGRAM_PROXY,
+                 ):
         super().__init__()
         self._token = token
         self._channel = channel

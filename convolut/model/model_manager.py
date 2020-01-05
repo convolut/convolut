@@ -50,7 +50,7 @@ class ModelManager(Module):
         assert (self._optimizer and self._scheduler) or self._optim_fn
 
         self._current_epoch_index = None
-        self._current_step = None
+        self._current_step_index = None
         self._current_batch_index = None
 
         self._current_loader_name = None
@@ -90,7 +90,7 @@ class ModelManager(Module):
     def handle_process_batch_start(self, event: LoaderProcessBatchStartEvent):
         self._current_loader_name = event.loader.name
         self._current_epoch_index = event.epoch_index
-        self._current_step = event.current_step
+        self._current_step_index = event.step_index
         self._current_batch_index = event.batch_index
 
         inpt = self._input_fn(event.batch).to(self._device)
@@ -129,7 +129,7 @@ class ModelManager(Module):
         self.pub(ModelLossStartEvent(output=output,
                                      target=target,
                                      loader_name=self._current_loader_name,
-                                     step_index=self._current_step,
+                                     step_index=self._current_step_index,
                                      batch_index=self._current_batch_index))
 
         loss = self._criterion(output, target)
@@ -138,7 +138,7 @@ class ModelManager(Module):
         self.pub(ModelLossEndEvent(loss=loss,
                                    epoch_index=self._current_epoch_index,
                                    loader_name=self._current_loader_name,
-                                   step_index=self._current_step,
+                                   step_index=self._current_step_index,
                                    batch_index=self._current_batch_index))
 
     def _backward(self):

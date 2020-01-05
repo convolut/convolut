@@ -1,3 +1,3 @@
 class FlushType:
-    PerEpoch = "epoch"
-    PerLoader = "loader"
+    PerEpoch = "per_epoch"
+    PerLoader = "per_loader"

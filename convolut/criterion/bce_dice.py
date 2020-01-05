@@ -16,9 +16,9 @@ class BCEDiceLoss(nn.Module):
     def __init__(self,
                  eps: float = CRITERION_BCEDICE_EPS,
                  threshold: float = CRITERION_BCEDICE_THRESHOLD,
-                 activation: Optional[nn.Module] = nn.Sigmoid,
                  bce_weight: float = CRITERION_BCEDICE_BCE_WEIGHT,
                  dice_weight: float = CRITERION_BCEDICE_DICE_WEIGHT,
+                 activation: Optional[nn.Module] = nn.Sigmoid,
                  ):
         super().__init__()
 
