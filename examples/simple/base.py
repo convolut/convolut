@@ -1,22 +1,24 @@
-from torch.optim.adam import Adam
+import os
+
 import torch
-from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch import nn
 from torch.nn import functional as F
+from torch.optim.adam import Adam
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision import datasets, transforms
 
-from convolut import Runner, StateManager, MetricManager, LoaderName, ScheduleType, FlushType
+from convolut import Runner, StateManager, MetricManager
 from convolut.loader import TrainLoader, ValidLoader
 from convolut.logger import ConsoleLogger
-from convolut.logger.console import ConsoleMode
-from convolut.logger.telegram import TelegramMode, TelegramLogger
-from convolut.logger.tensorboard import TensorboardMode, TensorboardLogger
+from convolut.logger.telegram import TelegramLogger
+from convolut.logger.tensorboard import TensorboardLogger
 from convolut.metric import LossMetric
 from convolut.model import ModelManager
 from convolut.state import FileCheckpoint
 from convolut.trigger.early_stopper import EarlyStopper
 
 
+# MODEL
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -42,8 +44,7 @@ class Net(nn.Module):
         return output
 
 
-epochs = 100
-
+# PYTORCH DATA LOADERS
 train_dataloader = torch.utils.data.DataLoader(datasets.MNIST('../data', train=True, download=True,
                                                               transform=transforms.Compose([
                                                                   transforms.ToTensor(),
@@ -51,58 +52,46 @@ train_dataloader = torch.utils.data.DataLoader(datasets.MNIST('../data', train=T
                                                               ])),
                                                batch_size=4, shuffle=False)
 
-# LOADERS
+# CONVOLUT LOADERS
 train_loader = TrainLoader(dataloader=train_dataloader)
 valid_loader = ValidLoader(dataloader=train_dataloader)
 
-
-# OPTIMIZERS AND SCHEDULERS PREPARATION
-def optim_fn(model):
-    model_params = [p for p in model.parameters() if p.requires_grad]
-
-    optimizer = Adam(model_params, lr=0.0001)
-    scheduler = CosineAnnealingLR(optimizer, 4, 1e-6)
-
-    return optimizer, scheduler
-
-
-# MODEL PREPARATION
+# OPTIMIZATIONS
 device = 'cpu'
 
 model = Net()
-optimizer, scheduler = optim_fn(model)
+model_params = [p for p in model.parameters() if p.requires_grad]
+
+optimizer = Adam(model_params, lr=0.0001)
+scheduler = CosineAnnealingLR(optimizer, 4, 1e-6)
 
 # CRITERION
 criterion = F.nll_loss
 
 # RUNNER INITIALIZATION AND RUN
+epochs = 100
 (
-    Runner(loaders=[train_loader, valid_loader],
-           epochs=epochs,
-           restart_iterator=False,
-           steps_per_epoch=1000)
-        # model training
+    Runner(loaders=[train_loader, valid_loader], epochs=epochs)
+        # append model training module
         .add(ModelManager(model=model,
                           device=device,
-                          optim_fn=optim_fn,
-                          schedule_type=ScheduleType.PerEpoch,
                           criterion=criterion,
                           optimizer=optimizer,
                           scheduler=scheduler,
                           input_fn=lambda batch: batch[0],
                           target_fn=lambda batch: batch[1]))
-        # states
+        # append state saving/loading
         .add(StateManager())
-        .add(FileCheckpoint(folder="run/checkpoints"))
-        #  metrics
-        .add(MetricManager(flush_type=FlushType.PerEpoch))
+        .add(FileCheckpoint())
+        #  append metric calculation/aggregation
+        .add(MetricManager())
         .add(LossMetric())
-        # triggers
-        .add(EarlyStopper(window=3, metric_name="loss", loader_name=LoaderName.Train, delta=1e-1))
-        # loggers
-        .add(ConsoleLogger(mode=ConsoleMode.SingleLine, folder="run/logs"))
-        .add(TensorboardLogger(folder="run/tensorlogs", mode=TensorboardMode.Basic))
-        .add(TelegramLogger(token="dfdfsf", channel="tetetet", mode=TelegramMode.Basic))
+        # append various triggers
+        .add(EarlyStopper())
+        # append various loggers
+        .add(ConsoleLogger())
+        .add(TensorboardLogger())
+        .add(TelegramLogger(token=os.environ.get("TOKEN"), chat_id=os.environ.get("CHAT_ID")))
 
         .start()
 )

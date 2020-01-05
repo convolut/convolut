@@ -29,8 +29,7 @@ class ModelManager(Module):
             input_fn: Callable[[Any], torch.Tensor] = lambda batch: batch["input"],
             target_fn: Callable[[Any], torch.Tensor] = lambda batch: batch["target"],
 
-            model_kwargs: Optional[Dict] = None,
-            optim_fn: Union[Dict[int, Callable[[Any], Tuple[Any, Any]]], Callable[[Any], Tuple[Any, Any]]] = None,
+            model_kwargs: Optional[Dict] = None
     ):
         super().__init__()
         self._model = model
@@ -46,9 +45,7 @@ class ModelManager(Module):
         self._input_fn = input_fn
         self._target_fn = target_fn
 
-        self._optim_fn = optim_fn
-
-        assert (self._optimizer and self._scheduler) or self._optim_fn
+        assert (self._optimizer and self._scheduler)
 
         self._current_epoch_index = None
         self._current_step_index = None
