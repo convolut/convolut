@@ -3,12 +3,16 @@ from typing import Optional
 import torch
 from torch import nn
 from ..utils.dice import dice
+from ..settings import (
+    CRITERION_DICE_EPS,
+    CRITERION_DICE_THRESHOLD
+)
 
 
 class DiceLoss(nn.Module):
     def __init__(self,
-                 eps: float = 1e-7,
-                 threshold: float = None,
+                 eps: float = CRITERION_DICE_EPS,
+                 threshold: float = CRITERION_DICE_THRESHOLD,
                  activation: Optional[nn.Module] = nn.Sigmoid(),
                  ):
         super().__init__()

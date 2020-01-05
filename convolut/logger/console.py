@@ -3,21 +3,20 @@ import sys
 from decouple import Module
 
 from ..events import RunnerForceStopEvent
-from ..constants import AnsiColor as Color, ConsoleMode
+from ..constants import AnsiColor as Color
 from ..metric.metric_manager import MetricManagerFlushEvent
 from ..runner import RunnerStartEvent
 from ..epoch import EpochStartEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchEndEvent
+from ..settings import LOGGER_CONSOLE_MODE
 
 
 class ConsoleLogger(Module):
     def __init__(self,
-                 mode: str = ConsoleMode.SingleLine,
-                 folder: str = "run/logs"):
+                 mode: str = LOGGER_CONSOLE_MODE):
         super().__init__()
 
         self._mode = mode
-        self._folder = folder
 
         self._current_epochs_limit = 0
         self._current_epoch_index = 0

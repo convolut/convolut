@@ -2,17 +2,22 @@ from collections import deque
 
 from decouple import Module
 
-from ..constants import LoaderName
 from ..events import RunnerForceStopEvent
 from ..metric import MetricManagerFlushEvent
+from ..settings import (
+    TRIGGER_EARLY_STOPPER_WINDOW,
+    TRIGGER_EARLY_STOPPER_METRIC_NAME,
+    TRIGGER_EARLY_STOPPER_LOADER_NAME,
+    TRIGGER_EARLY_STOPPER_DELTA
+)
 
 
 class EarlyStopper(Module):
     def __init__(self,
-                 window: int = 3,
-                 metric_name: str = "loss",
-                 loader_name: str = LoaderName.Valid,
-                 delta: float = 1e-4):
+                 window: int = TRIGGER_EARLY_STOPPER_WINDOW,
+                 metric_name: str = TRIGGER_EARLY_STOPPER_METRIC_NAME,
+                 loader_name: str = TRIGGER_EARLY_STOPPER_LOADER_NAME,
+                 delta: float = TRIGGER_EARLY_STOPPER_DELTA):
         super().__init__()
 
         self._window = window

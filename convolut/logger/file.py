@@ -8,11 +8,11 @@ from ..metric.metric_manager import MetricManagerFlushEvent
 from ..runner import RunnerStartEvent
 from ..epoch import EpochStartEvent
 from ..loader import LoaderStartEvent, LoaderProcessBatchEndEvent
+from ..settings import LOGGER_FILE_FOLDER
 
 
 class FileLogger(Module):
-    def __init__(self,
-                 folder: str = "run/logs"):
+    def __init__(self, folder: str = LOGGER_FILE_FOLDER):
         super().__init__()
 
         self._folder = folder

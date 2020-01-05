@@ -10,20 +10,21 @@ from .events import (
     StateSaveEvent,
     StateLoadEvent
 )
+from ..settings import STATE_FILE_CHECKPOINT_FOLDER, STATE_FILE_CHECKPOINT_SUFFIX
 
 
 class FileCheckpoint(Module):
     def __init__(
             self,
-            folder: str = 'checkpoints',
-            file_suffix: str = 'checkpoint.pth'
+            folder: str = STATE_FILE_CHECKPOINT_FOLDER,
+            suffix: str = STATE_FILE_CHECKPOINT_SUFFIX
     ):
         super().__init__()
         self._folder = folder
-        self._file_suffix = file_suffix
+        self._suffix = suffix
         self._filenames = {
-            'best': f'best_{self._file_suffix}',
-            'last': f'last_{self._file_suffix}',
+            'best': f'best_{self._suffix}',
+            'last': f'last_{self._suffix}',
         }
 
         self._filepaths = {}
@@ -51,7 +52,7 @@ class FileCheckpoint(Module):
 
     def _checkpoint_path(self, checkpoint_type: str) -> str:
         if checkpoint_type not in self._filenames:
-            self._filenames[checkpoint_type] = f'{checkpoint_type}_{self._file_suffix}'
+            self._filenames[checkpoint_type] = f'{checkpoint_type}_{self._suffix}'
             self._filepaths[checkpoint_type] = os.path.join(self._folder, self._filenames[checkpoint_type])
 
         filepath = self._filepaths[checkpoint_type]

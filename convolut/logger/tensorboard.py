@@ -4,17 +4,20 @@ from typing import Dict
 from decouple import Module
 from torch.utils.tensorboard import SummaryWriter
 
-from ..constants import TensorboardMode
 from ..runner import RunnerStartEvent, RunnerEndEvent
 from ..epoch import EpochStartEvent, EpochEndEvent
 from ..loader import LoaderStartEvent, LoaderEndEvent
 from ..metric import MetricManagerFlushEvent
+from ..settings import (
+    LOGGER_TENSORBOARD_FOLDER,
+    LOGGER_TENSORBOARD_MODE
+)
 
 
 class TensorboardLogger(Module):
     def __init__(self,
-                 folder: str,
-                 mode: str = TensorboardMode.Basic):
+                 folder: str = LOGGER_TENSORBOARD_FOLDER,
+                 mode: str = LOGGER_TENSORBOARD_MODE):
         super().__init__()
         self._folder = folder
         self._mode = mode

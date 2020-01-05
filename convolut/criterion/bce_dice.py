@@ -3,16 +3,22 @@ from typing import Optional
 import torch
 from torch import nn
 
+from ..settings import (
+    CRITERION_BCEDICE_EPS,
+    CRITERION_BCEDICE_THRESHOLD,
+    CRITERION_BCEDICE_BCE_WEIGHT,
+    CRITERION_BCEDICE_DICE_WEIGHT
+)
 from .dice import DiceLoss
 
 
 class BCEDiceLoss(nn.Module):
     def __init__(self,
-                 eps: float = 1e-7,
-                 threshold: float = None,
+                 eps: float = CRITERION_BCEDICE_EPS,
+                 threshold: float = CRITERION_BCEDICE_THRESHOLD,
                  activation: Optional[nn.Module] = nn.Sigmoid,
-                 bce_weight: float = 0.5,
-                 dice_weight: float = 0.5,
+                 bce_weight: float = CRITERION_BCEDICE_BCE_WEIGHT,
+                 dice_weight: float = CRITERION_BCEDICE_DICE_WEIGHT,
                  ):
         super().__init__()
 

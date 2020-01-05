@@ -1,5 +1,6 @@
-from .console import ConsoleLogger, ConsoleMode
-from .telegram import TelegramLogger, TelegramMode
-from .tensorboard import TensorboardLogger, TensorboardMode
+from .console import ConsoleLogger
+from .file import FileLogger
+from .telegram import TelegramLogger
+from .tensorboard import TensorboardLogger
 
-__all__ = ["ConsoleLogger", "ConsoleMode", "TelegramLogger", "TelegramMode", "TensorboardLogger", "TensorboardMode"]
+__all__ = ["ConsoleLogger", "FileLogger", "TelegramLogger", "TensorboardLogger"]

@@ -6,15 +6,20 @@ from decouple import Event, Mediator, Module
 from .epoch import Epoch
 from .events import RunnerForceStopEvent, EpochForceStopEvent
 from .loader import Loader
+from .settings import (
+    RUNNER_EPOCHS,
+    RUNNER_STEPS_PER_EPOCH,
+    RUNNER_RESTART_ITERATOR
+)
 
 
 class Runner(Module):
     def __init__(self,
                  loaders: Union[Dict[int, List[Loader]], List[Loader]],
 
-                 epochs: int = 1,
-                 steps_per_epoch: Optional[int] = None,
-                 restart_iterator: Optional[bool] = None,
+                 epochs: int = RUNNER_EPOCHS,
+                 steps_per_epoch: Optional[int] = RUNNER_STEPS_PER_EPOCH,
+                 restart_iterator: Optional[bool] = RUNNER_RESTART_ITERATOR,
                  mediator: Mediator = Mediator()
                  ):
         super().__init__(mediator)

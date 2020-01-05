@@ -1,22 +1,26 @@
-from typing import Optional
 from urllib.parse import quote_plus
 from urllib.request import Request, urlopen
 
 from decouple import Module
 
-from ..constants import TelegramMode
-from ..runner import RunnerStartEvent, RunnerEndEvent, RunnerForceStopEvent
 from ..epoch import EpochStartEvent
-from ..metric import MetricManagerFlushEvent
 from ..loader import LoaderStartEvent
+from ..metric import MetricManagerFlushEvent
+from ..runner import RunnerStartEvent, RunnerEndEvent, RunnerForceStopEvent
+from ..settings import (
+    LOGGER_TELEGRAM_TOKEN,
+    LOGGER_TELEGRAM_CHANNEL,
+    LOGGER_TELEGRAM_MODE,
+    LOGGER_TELEGRAM_PROXY
+)
 
 
 class TelegramLogger(Module):
     def __init__(self,
-                 token: str,
-                 channel: str,
-                 mode: str = TelegramMode.Basic,
-                 proxy: Optional[str] = 'https://api.telegram.org'):
+                 token: str = LOGGER_TELEGRAM_TOKEN,
+                 channel: str = LOGGER_TELEGRAM_CHANNEL,
+                 mode: str = LOGGER_TELEGRAM_MODE,
+                 proxy: str = LOGGER_TELEGRAM_PROXY):
         super().__init__()
         self._token = token
         self._channel = channel
