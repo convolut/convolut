@@ -135,3 +135,8 @@ class TrainLoader(Loader):
 class ValidLoader(Loader):
     def __init__(self, dataloader: Iterator):
         super().__init__(name=LoaderName.Valid, dataloader=dataloader)
+
+
+class InferLoader(Loader):
+    def __init__(self, dataloader: Iterator):
+        super().__init__(name=LoaderName.Infer, dataloader=dataloader)
