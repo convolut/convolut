@@ -9,7 +9,7 @@ from ..metric import MetricManagerFlushEvent
 from ..runner import RunnerStartEvent, RunnerEndEvent, RunnerForceStopEvent
 from ..settings import (
     LOGGER_TELEGRAM_TOKEN,
-    LOGGER_TELEGRAM_CHANNEL,
+    LOGGER_TELEGRAM_CHAT_ID,
     LOGGER_TELEGRAM_MODE,
     LOGGER_TELEGRAM_PROXY
 )
@@ -18,13 +18,13 @@ from ..settings import (
 class TelegramLogger(Module):
     def __init__(self,
                  token: str = LOGGER_TELEGRAM_TOKEN,
-                 channel: str = LOGGER_TELEGRAM_CHANNEL,
+                 chat_id: str = LOGGER_TELEGRAM_CHAT_ID,
                  mode: str = LOGGER_TELEGRAM_MODE,
                  proxy: str = LOGGER_TELEGRAM_PROXY,
                  ):
         super().__init__()
         self._token = token
-        self._channel = channel
+        self._chat_id = chat_id
         self._mode = mode
         self._proxy = proxy
         self._base_url = f"{self._proxy}/bot{self._token}/sendMessage"
@@ -46,7 +46,7 @@ class TelegramLogger(Module):
     def _send(self, text: str):
         try:
             quoted_text = quote_plus(text, safe='')
-            url = f"{self._base_url}?chat_id={self._channel}&disable_web_page_preview=1&text={quoted_text}"
+            url = f"{self._base_url}?chat_id={self._chat_id}&disable_web_page_preview=1&text={quoted_text}"
 
             request = Request(url)
             urlopen(request)
