@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import io
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with io.open("README.md", "r", encoding="utf-8") as f:
     readme = f.read()
@@ -17,7 +17,7 @@ setup(
     author="Andrey Avdeev",
     author_email="seorazer@gmail.com",
     license="Apache 2.0",
-    packages=["convolut"],
+    packages=find_packages(),
     zip_safe=False,
     python_requires=">=3.7",
     install_requires=[
