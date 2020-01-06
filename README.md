@@ -101,6 +101,9 @@ epochs = 10
         .start()
 )
 ```
+# Architecture
+## Dataflow
+![convolut dataflow](https://raw.githubusercontent.com/convolut/convolut/master/docs/img/dataflow.png)
 
 # Plugins
 * Telegram integration [here](https://github.com/convolut/convolut-telegram)
