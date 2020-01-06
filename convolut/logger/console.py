@@ -49,7 +49,6 @@ class ConsoleLogger(Module):
                             epochs_limit: int,
                             loader_name: str,
                             current_text: str,
-                            info: str,
                             bar_length: int = 20):
         division = float(epoch_index) / epochs_limit
         percent = int(100 * division)
@@ -71,7 +70,7 @@ class ConsoleLogger(Module):
 
         percent_str = f"[{percent_color_b}{arrow}{Color.B_Default}{spaces}] "
 
-        text = f"{epoch_str}{loader_str}{percent_str} | {current_text} | {info}"
+        text = f"{epoch_str}{loader_str}{percent_str} | {current_text} | {self._info}"
         self._write(text)
 
     def _write(self, text: str):
@@ -88,8 +87,7 @@ class ConsoleLogger(Module):
         self._write_progress_bar(epoch_index=self._current_epoch_index,
                                  epochs_limit=self._current_epochs_limit,
                                  loader_name=self._current_loader_name,
-                                 current_text=self._current_text,
-                                 info=self._info)
+                                 current_text=self._current_text)
 
     def handle_runner_start(self, event: RunnerStartEvent):
         self._current_epochs_limit = event.runner.epochs_limit

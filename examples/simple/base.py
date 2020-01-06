@@ -15,7 +15,7 @@ from convolut.metric import LossMetric
 from convolut.model import ModelManager
 from convolut.state import FileCheckpoint
 from convolut.trigger.early_stopper import EarlyStopper
-
+# from convolut_tensorboard import TensorboardLogger
 
 # MODEL
 class Net(nn.Module):
