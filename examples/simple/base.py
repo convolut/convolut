@@ -1,5 +1,3 @@
-import os
-
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -91,7 +89,5 @@ epochs = 10
         .add(ConsoleLogger())
         .add(FileLogger())
         # .add(TensorboardLogger())
-        # .add(TelegramLogger(token=os.environ.get("TOKEN"), chat_id=os.environ.get("CHAT_ID")))
-
         .start()
 )
